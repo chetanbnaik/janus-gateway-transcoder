@@ -33,6 +33,20 @@ gint64 janus_get_monotonic_time(void) {
 	return (ts.tv_sec*G_GINT64_CONSTANT(1000000)) + (ts.tv_nsec/G_GINT64_CONSTANT(1000));
 }
 
+/* Random string helper (for transactions) */
+static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+void janus_random_string(int length, char *buffer) {
+	if(length > 0 && buffer) {
+		int l = (int)(sizeof(charset)-1);
+		int i=0;
+		for(i=0; i<length; i++) {
+			int key = rand() % l;
+			buffer[i] = charset[key];
+		}
+		buffer[length-1] = '\0';
+	}
+}
+
 gint64 janus_get_real_time(void) {
 	struct timespec ts;
 	clock_gettime (CLOCK_REALTIME, &ts);
@@ -226,6 +240,76 @@ int janus_mkdir(const char *dir, mode_t mode) {
 		return res;
 	return 0;
 }
+
+char * janus_get_opus_dir (const char * sdp) {
+	if (sdp == NULL) return NULL;
+	if (!strstr(sdp, "m=audio") || (!strstr(sdp, "opus/48000") && !strstr(sdp, "OPUS/48000")))
+		return NULL;
+	const char * line = strstr(sdp, "m=audio");
+	while(line) {
+		char * next = strchr(line, '\n');
+		if (next) {
+			* next = '\0';
+			if (strstr(line, "a=sendrecv") || strstr(line,"a=sendonly") || strstr(line,"a=recvonly") || strstr(line,"a=inactive")) {
+				char direction[8];
+				if(sscanf(line, "a=%s", direction) == 1) {
+					*next = '\n';
+					return g_strdup(direction);
+				}
+			}
+			* next = '\n';
+		}
+		line = next ? (next + 1) : NULL;
+	}
+	return NULL;
+}
+
+char * janus_get_vp8_dir (const char * sdp) {
+	if (sdp == NULL) return NULL;
+	if (!strstr(sdp, "m=video") || (!strstr(sdp, "vp8/90000") && !strstr(sdp, "VP8/90000")))
+		return NULL;
+	const char * line = strstr(sdp, "m=video");
+	while(line) {
+		char * next = strchr(line, '\n');
+		if (next) {
+			* next = '\0';
+			if (strstr(line, "a=sendrecv") || strstr(line,"a=sendonly") || strstr(line,"a=recvonly") || strstr(line,"a=inactive")) {
+				char direction[8];
+				if(sscanf(line, "a=%s", direction) == 1) {
+					*next = '\n';
+					return g_strdup(direction);
+				}
+			}
+			* next = '\n';
+		}
+		line = next ? (next + 1) : NULL;
+	}
+	return NULL;
+}
+
+char * janus_get_h264_dir (const char * sdp) {
+	if (sdp == NULL) return NULL;
+	if (!strstr(sdp, "m=video") || (!strstr(sdp, "h264/90000") && !strstr(sdp, "H264/90000")))
+		return NULL;
+	const char * line = strstr(sdp, "m=video");
+	while(line) {
+		char * next = strchr(line, '\n');
+		if (next) {
+			* next = '\0';
+			if (strstr(line, "a=sendrecv") || strstr(line,"a=sendonly") || strstr(line,"a=recvonly") || strstr(line,"a=inactive")) {
+				char direction[8];
+				if(sscanf(line, "a=%s", direction) == 1) {
+					*next = '\n';
+					return g_strdup(direction);
+				}
+			}
+			* next = '\n';
+		}
+		line = next ? (next + 1) : NULL;
+	}
+	return NULL;
+}
+
 
 int janus_get_codec_pt(const char *sdp, const char *codec) {
 	if(!sdp || !codec)

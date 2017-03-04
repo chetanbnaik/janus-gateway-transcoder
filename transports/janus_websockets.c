@@ -879,7 +879,7 @@ void janus_websockets_session_created(void *transport, guint64 session_id) {
 }
 
 void janus_websockets_session_over(void *transport, guint64 session_id, gboolean timeout) {
-	if(transport == NULL)
+	if(transport == NULL || !timeout)
 		return;
 	/*if(transport == NULL || !timeout)
 		return;*/

@@ -879,8 +879,10 @@ void janus_websockets_session_created(void *transport, guint64 session_id) {
 }
 
 void janus_websockets_session_over(void *transport, guint64 session_id, gboolean timeout) {
-	if(transport == NULL || !timeout)
+	if(transport == NULL)
 		return;
+	/*if(transport == NULL || !timeout)
+		return;*/
 	/* We only care if it's a timeout: if so, close the connection */
 	janus_websockets_client *client = (janus_websockets_client *)transport;
 	/* Make sure this is not related to a closed WebSocket session */

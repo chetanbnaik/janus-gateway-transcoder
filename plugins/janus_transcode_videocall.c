@@ -455,7 +455,7 @@ typedef struct janus_rtp_packet {
 	gint is_video;
 } janus_rtp_packet;
 static janus_rtp_packet eos_vpacket;
-static janus_rtp_packet eos_apacket;
+//static janus_rtp_packet eos_apacket;
 
 typedef struct janus_transcode_session {
 	janus_plugin_session *handle;
@@ -1326,7 +1326,7 @@ static void *janus_transcode_handler(void *data) {
 				janus_mutex_unlock(&sessions_mutex);
 				JANUS_LOG(LOG_ERR, "Offline\n");
 				error_code = JANUS_TRANSCODE_ERROR_NO_SUCH_USERNAME;
-				g_snprintf(error_cause, 512, "Username '%s' doesn't exist", username_text);
+				g_snprintf(error_cause, 512, "Username '%s' is not online", username_text);
 				goto error;
 			}
 			if(peer->peer != NULL) {
@@ -1512,8 +1512,8 @@ static void *janus_transcode_handler(void *data) {
 			JANUS_LOG(LOG_VERB, "%s is accepting a call from %s\n", session->username, session->peer->username);
 			JANUS_LOG(LOG_VERB, "This is involving a negotiation (%s) as well:\n%s\n", msg_sdp_type, msg_sdp);
 			
-			session->has_audio = (strstr(peer_sdp, "m=audio") != NULL);
-			session->has_video = (strstr(peer_sdp, "m=video") != NULL);
+			session->has_audio = (strstr(msg_sdp, "m=audio") != NULL);
+			session->has_video = (strstr(msg_sdp, "m=video") != NULL);
 			
 			int audio_pt = 0, video_pt = 0;
 
